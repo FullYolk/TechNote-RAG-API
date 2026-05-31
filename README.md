@@ -21,15 +21,18 @@
 - 返回引用来源
 - FastAPI /ask 接口
 
-## 项目结构
-day18_rag_api/
+##  项目结构
+
+```text
+.
 ├── main.py                # FastAPI 路由入口
 ├── rag_service.py         # 核心业务层（原生 RAG 实现）
 ├── schemas.py             # 数据契约层（Pydantic 校验模型）
-├── embedding.py           # 向量化模型单例封装
+├── embedding.py           # 向量化模型提取
 ├── rag_langchain_demo.py  # LangChain / LCEL 对照实现版本
-├── chroma_db/             # 本地向量库持久化目录
-└── .env                   # 环境变量配置
+├── chroma_db/             # 本地向量库持久化目录 (已在 .gitignore 忽略)
+└── .env                   # 环境变量配置 (已在 .gitignore 忽略)
+```
 
 ## 快速开始
 * 在根目录创建.env文件并添加以下变量：
