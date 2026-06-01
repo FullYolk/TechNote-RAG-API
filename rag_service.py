@@ -22,6 +22,23 @@ client = OpenAI(
 
 current_dir = Path(__file__).parent
 PERSIST_DIR = str(current_dir/"chroma_db")
+_vector_store = None
+
+def get_vector_store():
+    global _vector_store
+    if not _vector_store:
+        logging.info("正在初始化全局Chroma实例")
+        _vector_store = Chroma(
+        persist_directory=PERSIST_DIR,
+        embedding_function=get_embeddings()
+        )
+    return _vector_store
+
+def rag_vector_store_cache():
+    global _vector_store
+    _vector_store = None
+    logging.info("全局Chroma缓存已重置")
+
 
 def build_context(results:list) -> str:
     parts = []
@@ -52,10 +69,7 @@ def build_sources(results:list)->list[dict]:
     return sources
 
 def answer_with_rag(query:str, k:int =3):
-    vector_store = Chroma(
-        persist_directory=PERSIST_DIR,
-        embedding_function=get_embeddings()
-    )
+    vector_store = get_vector_store()
     results = vector_store.similarity_search_with_score(query=query,k=k)
     logging.info(f"检索结果top{k}")
     for i,(doc, score) in enumerate(results,1):

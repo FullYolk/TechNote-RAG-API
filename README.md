@@ -20,6 +20,9 @@
 - 基于上下文回答问题
 - 返回引用来源
 - FastAPI /ask 接口
+- **[New]** 基于 Lifespan 的向量库应用级预热与全局单例模式 (大幅降低首响延迟)
+- **[New]** `/rebuild_index` 接口支持知识库热更新，无需重启服务
+- **[New]** 底层接入 SQLite 实现全链路 RAG 日志埋点追踪 (Query, 耗时, 来源记录)
 
 ##  项目结构
 
@@ -27,9 +30,12 @@
 .
 ├── main.py                # FastAPI 路由入口
 ├── rag_service.py         # 核心业务层（原生 RAG 实现）
+├── index_service.py       # 索引重构服务层 (处理热更新)
 ├── schemas.py             # 数据契约层（Pydantic 校验模型）
+├── db.py                  # SQLite 数据库底层操作
 ├── embedding.py           # 向量化模型提取
 ├── rag_langchain_demo.py  # LangChain / LCEL 对照实现版本
+├── app.db                 # SQLite 日志数据库 (自动生成)
 ├── chroma_db/             # 本地向量库持久化目录 (已在 .gitignore 忽略)
 └── .env                   # 环境变量配置 (已在 .gitignore 忽略)
 ```
@@ -43,6 +49,21 @@ LLM_MODEL="your_model_name"
 EMBEDDING_API_KEY="..."
 EMBEDDING_BASE_URL="..."
 EMBEDDING_MODEL="..."
+```
+* 建库
+```
+mkdir data
+```
+
+将你的md文件放入data文件夹中
+
+```
+python build_vectorstore.py
+```
+
+看到文件目录下出现chroma_db/ 则建库完成
+
+
 ```
 * 启动服务
 ```
@@ -64,7 +85,9 @@ uvicorn main:app --reload
 - 尚未实现 rerank / hybrid search / query rewrite
 
 ## 优化计划
-* 当前每次请求都重新加载Chroma 需重构为全局单例或注入liffespan
-* 目前仅依赖基础的余弦相似度检索 计划引入query rewrite和rerank
-* 后续添加流式支持
+- **已完成**：重构 Chroma 为全局单例，并注入 FastAPI lifespan 实现服务预热。
+- **已完成**：实现热重载机制与 SQLite 日志打点。
+- **下一步**：构建 RAG 自动化评测脚本 (基于 eval 黄金测试集)。
+- **未来计划**：引入 query rewrite (查询重写) 和 rerank (重排) 机制优化检索准确率。
+- **未来计划**：加入 SSE 流式输出支持。
 * 使用Docker构建镜像 一键部署
