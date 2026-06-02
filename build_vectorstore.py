@@ -1,4 +1,3 @@
-import inspect
 from pathlib import Path
 from langchain_chroma import Chroma
 from split_docs import split_documents

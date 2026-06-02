@@ -14,7 +14,8 @@ def get_embeddings() -> OpenAIEmbeddings:
     embeddings = OpenAIEmbeddings(
         api_key=API_KEY,
         base_url=BASE_URL,
-        model=MODEL
+        model=MODEL,
+        check_embedding_ctx_length=False
     )
 
     return embeddings

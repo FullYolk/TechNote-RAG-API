@@ -1,6 +1,6 @@
 from fastapi import FastAPI,HTTPException
 from schemas import AskRequest,AskResponse
-from rag_service import answer_with_rag, rag_vector_store_cache, get_vector_store
+from rag_service import answer_with_rag, reset_vector_store_cache, get_vector_store
 from index_service import rebuild_vectorstore
 import logging
 from contextlib import asynccontextmanager
@@ -41,7 +41,7 @@ def ask(request:AskRequest):
         start = time.perf_counter()
         res = answer_with_rag(request.query, request.k)
         latency_ms = int((time.perf_counter() - start) * 1000)
-        log_query(request.query, res.answer, res.sources, latency_ms)
+        log_query(request.query, res["answer"], res["sources"], latency_ms)
         return AskResponse(**res)
     except Exception as e:
         logging.error(f"发生错误，异常为{str(e)}",exc_info=True)
@@ -50,9 +50,9 @@ def ask(request:AskRequest):
 @app.post("/rebuild_index")
 def rebuild_index():
     try:
-        rag_vector_store_cache()
+        reset_vector_store_cache()
         res = rebuild_vectorstore()
-        rag_vector_store_cache()
+        reset_vector_store_cache()
         logging.info("已更新向量库")
         return {
             "status":"ok",

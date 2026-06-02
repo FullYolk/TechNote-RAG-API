@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List,Optional
+from typing import List
 
 class SourceItem(BaseModel):
     filename:str = Field(description="知识来源文件名")

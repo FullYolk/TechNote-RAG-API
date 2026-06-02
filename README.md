@@ -37,6 +37,7 @@
 ├── rag_langchain_demo.py  # LangChain / LCEL 对照实现版本
 ├── app.db                 # SQLite 日志数据库 (自动生成)
 ├── chroma_db/             # 本地向量库持久化目录 (已在 .gitignore 忽略)
+├── tools/   # 向量诊断与日志审查工具
 └── .env                   # 环境变量配置 (已在 .gitignore 忽略)
 ```
 
@@ -57,14 +58,19 @@ mkdir data
 
 将你的md文件放入data文件夹中
 
+
+由于 chroma_db/ 被 .gitignore 忽略，首次运行前需要先构建索引：
 ```
 python build_vectorstore.py
+```
+或启动服务后调用：
+```
+POST /rebuild_index
 ```
 
 看到文件目录下出现chroma_db/ 则建库完成
 
 
-```
 * 启动服务
 ```
 uvicorn main:app --reload
@@ -73,6 +79,30 @@ uvicorn main:app --reload
 * API调试
 通过浏览器自动生成的swagger文档进行调试
 
+## API 示例
+
+### POST /ask
+
+请求：
+```
+{
+  "query": "什么是RAG？",
+  "k": 3
+}
+```
+响应：
+```
+{
+  "answer": "...",
+  "sources": [
+    {
+      "filename": "rag_notes.md",
+      "score": 0.1234,
+      "preview": "..."
+    }
+  ]
+}
+```
 ## 示例问题
 - 什么是RAG？
 - 什么时候应该使用RAG？
@@ -83,6 +113,7 @@ uvicorn main:app --reload
 - 当前数据集较小
 - 检索结果可能集中于同一文档
 - 尚未实现 rerank / hybrid search / query rewrite
+- 如果 Windows 下 /rebuild_index 删除 chroma_db 失败，可先停止服务后执行 python build_vectorstore.py 重建索引。
 
 ## 优化计划
 - **已完成**：重构 Chroma 为全局单例，并注入 FastAPI lifespan 实现服务预热。

@@ -26,7 +26,7 @@ _vector_store = None
 
 def get_vector_store():
     global _vector_store
-    if not _vector_store:
+    if _vector_store is None:
         logging.info("正在初始化全局Chroma实例")
         _vector_store = Chroma(
         persist_directory=PERSIST_DIR,
@@ -34,7 +34,7 @@ def get_vector_store():
         )
     return _vector_store
 
-def rag_vector_store_cache():
+def reset_vector_store_cache():
     global _vector_store
     _vector_store = None
     logging.info("全局Chroma缓存已重置")
